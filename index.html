@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Расписание СГМУ v31.7 | Элсагир Исмаил</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e3c72">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="СГМУ 2026">
+    <link rel="apple-touch-icon" href="icon-192.svg">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#1e3c72;--secondary:#2a5298;--bg-body:#1e3c72;--bg-card:rgba(255,255,255,0.95);
+            --text:#333;--text-light:#666;--shadow:0 10px 30px rgba(0,0,0,0.3);--border:#e2e8f0;
+            --bg-section:#f7fafc;--bg-input:#fff;--bg-legend:rgba(255,255,255,0.95);
+            --bg-footer:rgba(0,0,0,0.2);--footer-text:#fff;--header-text:#fff
+        }
+        [data-theme="dark"]{
+            --primary:#90caf9;--secondary:#64b5f6;--bg-body:#121212;--bg-card:#1e1e1e;
+            --text:#e0e0e0;--text-light:#aaa;--shadow:0 10px 30px rgba(0,0,0,0.6);--border:#333;
+            --bg-section:#252525;--bg-input:#2a2a2a;--bg-legend:#1e1e1e;
+            --bg-footer:#1a1a1a;--footer-text:#ccc;--header-text:#e0e0e0
+        }
+        body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-body);min-height:100vh;padding:15px;color:var(--text);width:100%;max-width:100vw;overflow-x:hidden;transition:background 0.3s,color 0.3s}
+        [data-theme="dark"] body{background:#121212}
+        .container{max-width:1400px;margin:0 auto;width:100%}
+        header{text-align:center;color:var(--header-text);margin-bottom:25px;animation:fadeIn 1s}
+        h1{font-size:2.2em;margin-bottom:8px;text-shadow:2px 2px 4px rgba(0,0,0,0.3)}
+        .version-badge{display:inline-block;background:#ffd700;color:#000;padding:4px 14px;border-radius:20px;font-weight:bold;font-size:0.85em;margin-top:8px}
+        .author-info{margin-top:12px;padding:8px 18px;background:rgba(255,255,255,0.15);border-radius:25px;display:inline-block;backdrop-filter:blur(5px)}
+        .author-info a{color:#ffd700;text-decoration:none;font-weight:bold}
+        .countdown-bar{background:var(--bg-card);padding:15px 20px;border-radius:15px;margin-bottom:20px;box-shadow:var(--shadow);text-align:center;display:flex;flex-wrap:wrap;justify-content:center;gap:15px;align-items:center}
+        .countdown-item{display:flex;flex-direction:column;align-items:center;min-width:70px}
+        .countdown-num{font-size:1.8em;font-weight:bold;color:var(--primary)}
+        .countdown-label{font-size:0.75em;color:var(--text-light);margin-top:2px}
+        .quick-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+        .action-btn{padding:12px 20px;border:none;border-radius:15px;cursor:pointer;font-weight:bold;font-size:0.95em;transition:all 0.3s;display:flex;align-items:center;gap:6px;box-shadow:0 4px 15px rgba(0,0,0,0.2);flex-shrink:0}
+        .btn-today{background:linear-gradient(135deg,#48bb78,#38a169);color:#fff}
+        .btn-tomorrow{background:linear-gradient(135deg,#ed8936,#dd6b20);color:#fff}
+        .btn-export{background:linear-gradient(135deg,#4299e1,#3182ce);color:#fff}
+        .btn-install{background:linear-gradient(135deg,#9f7aea,#805ad5);color:#fff}
+        .btn-dark{background:linear-gradient(135deg,#2d3748,#1a202c);color:#ffd700}
+        [data-theme="dark"] .btn-dark{background:linear-gradient(135deg,#ffd700,#ecc94b);color:#000}
+        .action-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3)}
+        .action-btn:active{transform:scale(0.97)}
+        .top-right-btns{position:fixed;top:15px;right:15px;display:flex;flex-direction:column;gap:10px;z-index:100}
+        .fab{width:50px;height:50px;border-radius:50%;border:none;cursor:pointer;font-size:1.3em;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:all 0.3s;display:flex;align-items:center;justify-content:center;position:relative}
+        .fab:hover{transform:scale(1.1)}
+        .fab-fav{background:#f56565;color:#fff}
+        .fab-count{position:absolute;top:-4px;right:-4px;background:#2d3748;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.65em;font-weight:bold}
+        .stats-bar{background:var(--bg-card);padding:18px;border-radius:15px;margin-bottom:18px;box-shadow:var(--shadow);display:none}
+        .stats-bar.active{display:block;animation:slideUp 0.4s}
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+        .stat-card{background:var(--bg-section);padding:12px;border-radius:12px;text-align:center;border-left:4px solid var(--primary)}
+        .stat-number{font-size:1.8em;font-weight:bold;color:var(--primary)}
+        .stat-label{color:var(--text-light);font-size:0.85em;margin-top:3px}
+        .controls{background:var(--bg-card);padding:20px;border-radius:18px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center}
+        .search-box{display:flex;flex-direction:column;gap:6px}
+        .search-box label{font-weight:bold;color:var(--primary);font-size:0.85em}
+        input[type="date"]{padding:10px 14px;border:2px solid var(--border);border-radius:12px;font-size:1em;min-width:180px;transition:all 0.3s;background:var(--bg-input);color:var(--text)}
+        input[type="date"]:focus{outline:none;border-color:var(--secondary);box-shadow:0 0 0 3px rgba(42,82,152,0.15)}
+        .btn{padding:10px 20px;border:none;border-radius:12px;cursor:pointer;font-weight:bold;transition:all 0.3s;font-size:0.95em}
+        .btn-primary{background:var(--primary);color:#fff}
+        .btn-primary:hover{opacity:0.9;transform:translateY(-1px)}
+        .btn-secondary{background:var(--bg-section);color:var(--primary)}
+        .btn-secondary:hover{opacity:0.8}
+        .schedule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
+        .day-card{background:var(--bg-card);border-radius:18px;padding:20px;box-shadow:var(--shadow);animation:slideUp 0.6s;display:none}
+        .day-card.active{display:block}
+        @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        .day-header{font-size:1.4em;font-weight:bold;color:var(--primary);margin-bottom:15px;padding-bottom:10px;border-bottom:3px solid var(--secondary);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+        .lesson{margin:15px 0;border-radius:12px;overflow:hidden;transition:all 0.3s;cursor:pointer;position:relative}
+        .lesson:hover{transform:translateX(3px);box-shadow:0 4px 15px rgba(0,0,0,0.15)}
+        .lesson-progress{padding:8px 12px;background:rgba(255,255,255,0.85);border-top:1px dashed var(--border);font-size:0.8em}
+        [data-theme="dark"] .lesson-progress{background:rgba(0,0,0,0.3)}
+        .progress-bar{width:100%;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin:6px 0}
+        [data-theme="dark"] .progress-bar{background:#444}
+        .progress-fill{height:100%;background:linear-gradient(90deg,#48bb78,#38a169);border-radius:3px;transition:width 0.5s}
+        .progress-text{display:flex;justify-content:space-between;color:var(--text-light);font-size:0.85em}
+        .next-lesson{color:#2b6cb0;font-weight:600;margin-top:4px;font-size:0.9em}
+        .lesson-header{padding:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
+        .lesson-time{font-weight:bold;font-size:0.9em;opacity:0.9;min-width:90px}
+        .lesson-title{font-weight:600;font-size:1em;flex:1;line-height:1.3;min-width:120px}
+        .lesson-badge{background:rgba(255,255,255,0.3);padding:3px 8px;border-radius:20px;font-size:0.7em;font-weight:bold;white-space:nowrap}
+        .note-indicator{position:absolute;top:8px;left:8px;font-size:0.8em;background:rgba(255,193,7,0.9);color:#000;padding:2px 6px;border-radius:10px;font-weight:bold;z-index:5}
+        .favorite-star{position:absolute;top:8px;right:8px;cursor:pointer;font-size:1.2em;opacity:0;transition:all 0.3s;z-index:5}
+        .lesson:hover .favorite-star{opacity:1}
+        .favorite-star.active{opacity:1;color:#ffd700}
+        .pharma{background:linear-gradient(135deg,#c6f6d5,#9ae6b4);border-left:5px solid #48bb78}
+        .anatomy{background:linear-gradient(135deg,#fed7d7,#feb2b2);border-left:5px solid #f56565}
+        .pathophys{background:linear-gradient(135deg,#e9d8fd,#d6bcfa);border-left:5px solid #9f7aea}
+        .surgery{background:linear-gradient(135deg,#feebc8,#fbd38d);border-left:5px solid #ed8936}
+        .propedeutics{background:linear-gradient(135deg,#b2f5ea,#81e6d9);border-left:5px solid #38b2ac}
+        .immunology{background:linear-gradient(135deg,#fefcbf,#faf089);border-left:5px solid #d69e2e}
+        .rki{background:linear-gradient(135deg,#bee3f8,#90cdf4);border-left:5px solid #4299e1}
+        .cycle{background:linear-gradient(135deg,#e2e8f0,#cbd5e0);border-left:5px solid #718096}
+        .emergency{background:linear-gradient(135deg,#feb2b2,#fc8181);border-left:5px solid #c53030}
+        .health{background:linear-gradient(135deg,#fed7e2,#fbb6ce);border-left:5px solid #d53f8c}
+        .topographic{background:linear-gradient(135deg,#feebc8,#f6ad55);border-left:5px solid #dd6b20}
+        .biochem{background:linear-gradient(135deg,#d6f5d6,#9ae6b4);border-left:5px solid #38a169}
+        .pe{background:linear-gradient(135deg,#c6f6d5,#9ae6b4);border-left:5px solid #2f855a}
+        [data-theme="dark"] .pharma,[data-theme="dark"] .anatomy,[data-theme="dark"] .pathophys,[data-theme="dark"] .surgery,[data-theme="dark"] .propedeutics,[data-theme="dark"] .immunology,[data-theme="dark"] .rki,[data-theme="dark"] .cycle,[data-theme="dark"] .emergency,[data-theme="dark"] .health,[data-theme="dark"] .topographic,[data-theme="dark"] .biochem,[data-theme="dark"] .pe{filter:brightness(0.7) saturate(0.8)}
+        .cycle-details{background:rgba(255,255,255,0.6);padding:8px 12px;border-top:1px dashed var(--border);font-size:0.85em}
+        [data-theme="dark"] .cycle-details{background:rgba(0,0,0,0.2)}
+        .cycle-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:4px}
+        .cycle-item:last-child{border-bottom:none}
+        .cycle-period{font-size:0.8em;color:var(--text-light);background:var(--bg-section);padding:2px 8px;border-radius:10px}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(5px);z-index:1000;justify-content:center;align-items:center;padding:15px}
+        .modal-overlay.active{display:flex;animation:fadeIn 0.3s}
+        .modal{background:var(--bg-card);border-radius:20px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);animation:slideUp 0.4s}
+        .modal-header{padding:20px;background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;border-radius:20px 20px 0 0;position:relative}
+        .modal-title{font-size:1.3em;font-weight:bold;margin-bottom:4px;padding-right:40px}
+        .modal-time{opacity:0.9;font-size:1em}
+        .close-btn{position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.2);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.1em;transition:all 0.3s}
+        .close-btn:hover{background:rgba(255,255,255,0.3);transform:rotate(90deg)}
+        .modal-body{padding:20px}
+        .info-section{margin-bottom:15px;padding:14px;background:var(--bg-section);border-radius:12px;border-left:4px solid var(--primary)}
+        .info-section h3{color:var(--primary);margin-bottom:6px;font-size:0.9em;text-transform:uppercase;letter-spacing:1px}
+        .info-section p{color:var(--text);line-height:1.5;font-size:0.95em}
+        .map-link{display:inline-flex;align-items:center;gap:6px;color:var(--primary);text-decoration:none;font-weight:bold;margin-top:8px;padding:6px 14px;background:rgba(66,153,225,0.1);border-radius:8px;transition:all 0.3s;font-size:0.9em}
+        .map-link:hover{background:var(--primary);color:#fff}
+        .dates-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+        .date-tag{background:var(--primary);color:#fff;padding:3px 10px;border-radius:20px;font-size:0.8em;font-weight:500}
+        .notes-section{margin-top:15px;padding:14px;background:linear-gradient(135deg,#fffff0,#fefcbf);border-radius:12px;border-left:4px solid #d69e2e}
+        [data-theme="dark"] .notes-section{background:linear-gradient(135deg,#2d2a10,#3d3510)}
+        .notes-section h3{color:#d69e2e;margin-bottom:8px;font-size:0.9em}
+        .notes-textarea{width:100%;min-height:80px;border:2px solid #e2e8f0;border-radius:8px;padding:10px;font-size:0.95em;font-family:inherit;resize:vertical;transition:border-color 0.3s;background:var(--bg-input);color:var(--text)}
+        .notes-textarea:focus{outline:none;border-color:#d69e2e}
+        .notes-saved{color:#38a169;font-size:0.8em;margin-top:5px;display:none;font-weight:bold}
+        .conflict-notice{background:#fed7d7;color:#742a2a;padding:10px;border-radius:8px;margin-bottom:12px;font-weight:bold;text-align:center;border:2px dashed #fc8181;font-size:0.9em}
+        [data-theme="dark"] .conflict-notice{background:#3d1a1a;color:#feb2b2}
+        .results-info{background:#c6f6d5;color:#22543d;padding:12px;border-radius:12px;margin-bottom:15px;text-align:center;font-weight:bold;display:none;font-size:0.95em}
+        .results-info.active{display:block;animation:slideUp 0.4s}
+        [data-theme="dark"] .results-info{background:#1a3a1a;color:#9ae6b4}
+        .no-results{text-align:center;color:var(--header-text);font-size:1.2em;padding:30px;display:none}
+        .no-results.active{display:block}
+        .current-day{box-shadow:0 0 0 3px #ffd700,0 4px 15px rgba(255,215,0,0.3)!important}
+        .install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;padding:14px 18px;z-index:999;box-shadow:0 -4px 20px rgba(0,0,0,0.3)}
+        .install-banner.active{display:flex;align-items:center;justify-content:space-between;gap:10px}
+        .install-banner-text{flex:1}
+        .install-banner-text strong{display:block;font-size:1em}
+        .install-banner-text span{font-size:0.8em;opacity:0.85}
+        .install-banner-btn{background:#ffd700;color:#000;border:none;padding:8px 20px;border-radius:25px;font-weight:bold;cursor:pointer}
+        .install-banner-close{background:none;border:none;color:#fff;font-size:1.4em;cursor:pointer;opacity:0.7;padding:4px}
+        .offline-badge{display:none;position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#e53e3e;color:#fff;padding:6px 14px;border-radius:20px;font-size:0.8em;font-weight:bold;z-index:101}
+        .offline-badge.active{display:block}
+        .legend{background:var(--bg-legend);padding:15px;border-radius:15px;margin-bottom:18px;box-shadow:var(--shadow)}
+        .legend h3{color:var(--primary);margin-bottom:10px;text-align:center;font-size:1em}
+        .legend-items{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+        .legend-item{display:flex;align-items:center;gap:5px;font-size:0.8em;cursor:pointer;padding:4px 10px;border-radius:20px;transition:all 0.3s}
+        .legend-item:hover{background:rgba(0,0,0,0.05)}
+        .legend-item.hidden{opacity:0.4;text-decoration:line-through}
+        .color-box{width:14px;height:14px;border-radius:4px}
+        footer{text-align:center;color:var(--footer-text);margin-top:40px;padding:25px 15px;background:var(--bg-footer);border-radius:18px}
+        .footer-name{font-size:1.2em;font-weight:bold;color:#ffd700}
+        .footer-links{display:flex;justify-content:center;gap:15px;flex-wrap:wrap;margin-top:10px}
+        .footer-links a{color:var(--footer-text);text-decoration:none;padding:6px 14px;background:rgba(255,255,255,0.1);border-radius:20px;transition:all 0.3s;font-size:0.9em}
+        .footer-links a:hover{background:rgba(255,255,255,0.2)}
+        @media(max-width:768px){
+            body{padding:8px}
+            h1{font-size:1.5em}
+            .author-info{padding:6px 12px;font-size:0.85em}
+            .countdown-bar{padding:10px;gap:8px}
+            .countdown-num{font-size:1.3em}
+            .countdown-item{min-width:55px}
+            .quick-actions{gap:6px;padding:0 2px}
+            .action-btn{padding:10px 14px;font-size:0.8em;flex:1;min-width:0;justify-content:center}
+            .top-right-btns{top:8px;right:8px;gap:6px}
+            .fab{width:42px;height:42px;font-size:1.1em}
+            .controls{padding:12px;gap:8px}
+            input[type="date"]{width:100%;min-width:auto;padding:10px;font-size:1em}
+            .btn{width:100%;padding:10px;font-size:0.95em}
+            .search-box{width:100%}
+            .schedule-grid{grid-template-columns:1fr;gap:12px}
+            .day-card{padding:15px 12px;border-radius:14px}
+            .day-header{font-size:1.2em}
+            .lesson{margin:12px 0;border-radius:10px}
+            .lesson-header{padding:10px;gap:6px}
+            .lesson-title{font-size:0.95em;min-width:80px}
+            .lesson-time{font-size:0.85em;min-width:80px}
+            .lesson-badge{font-size:0.65em}
+            .favorite-star{opacity:0.7;font-size:1em}
+            .modal{margin:8px;width:calc(100% - 16px);max-height:92vh;border-radius:16px}
+            .modal-header{padding:15px;border-radius:16px 16px 0 0}
+            .modal-title{font-size:1.1em}
+            .modal-body{padding:15px}
+            .info-section{padding:10px}
+            .stats-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+            .stat-number{font-size:1.4em}
+            .legend{padding:10px}
+            .legend-items{gap:5px}
+            .legend-item{font-size:0.75em;padding:3px 7px}
+            footer{padding:15px 10px;margin-top:20px}
+            .footer-links{gap:8px}
+            .footer-links a{padding:5px 10px;font-size:0.8em}
+            .install-banner{flex-direction:column;text-align:center;padding:15px}
+        }
+    </style>
+</head>
+<body>
+    <div class="top-right-btns">
+        <button class="fab fab-fav" onclick="showFavorites()">⭐<span class="fab-count" id="favCount">0</span></button>
+    </div>
+    <div class="offline-badge" id="offlineBadge">📵 Офлайн</div>
+    <div class="container">
+        <header>
+            <h1>📚 Расписание СГМУ</h1>
+            <p style="opacity:0.9;font-size:0.95em;">Саратовский ГМУ | Весна 2026</p>
+            <div class="version-badge">v31.7 ⚡</div>
+            <div class="author-info">Разработано: <strong>Элсагир Исмаил</strong> | <a href="https://t.me/dr_elsaghir" target="_blank">📱 @dr_elsaghir</a></div>
+        </header>
+        <div class="countdown-bar" id="countdownBar"></div>
+        <div class="quick-actions">
+            <button class="action-btn btn-today" onclick="showToday()">🌅 Сегодня</button>
+            <button class="action-btn btn-tomorrow" onclick="showTomorrow()">🌄 Завтра</button>
+            <button class="action-btn btn-export" onclick="exportICS()">📤 ICS</button>
+            <button class="action-btn btn-dark" id="darkBtn" onclick="toggleDark()">🌙</button>
+            <button class="action-btn btn-install" id="installBtn" style="display:none;" onclick="installPWA()">📲</button>
+        </div>
+        <div class="stats-bar" id="statsBar"><div class="stats-grid" id="statsGrid"></div></div>
+        <div class="controls">
+            <div class="search-box"><label>🔍 Поиск по дате</label><input type="date" id="dateSearch"></div>
+            <button class="btn btn-primary" onclick="searchByDate()">Найти</button>
+            <button class="btn btn-secondary" onclick="showAll()">Все</button>
+        </div>
+        <div class="results-info" id="resultsInfo"></div>
+        <div class="no-results" id="noResults">📭 Занятий нет</div>
+        <div class="legend" id="legend"></div>
+        <div class="schedule-grid" id="scheduleGrid"></div>
+    </div>
+    <footer><div class="footer-name">© 2026 Элсагир Исмаил</div><div style="margin-top:5px;">СГМУ | v31.7</div><div class="footer-links"><a href="https://t.me/dr_elsaghir" target="_blank">📱 Telegram</a><a href="#" onclick="alert('v31.7\nЭлсагир Исмаил\n© 2026')">ℹ️ О проекте</a></div></footer>
+    <div class="install-banner" id="installBanner"><div class="install-banner-text"><strong>📲 Установить</strong><span>Быстрый доступ без браузера</span></div><button class="install-banner-btn" onclick="installPWA()">Установить</button><button class="install-banner-close" onclick="dismissInstall()">×</button></div>
+    <div class="modal-overlay" id="modal" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><div class="modal-title" id="modalTitle"></div><div class="modal-time" id="modalTime"></div><button class="close-btn" onclick="closeModal()">×</button></div><div class="modal-body" id="modalBody"></div></div></div>
+    <script>
+        const CURRENT_DATE=new Date();
+        const SEMESTER_END=new Date(2026,5,11);
+        const cycleData={
+            tuesday:[
+                {name:"Общая хирургия",period:"16/04–30/04, 05/05–07/05",location:"СГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141"},
+                {name:"Неотложные состояния",period:"15/05–20/05",location:"корпус №7",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137"},
+                {name:"Пропедевтика",period:"21/05–11/06",location:"ГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141"}
+            ],
+            wednesday:[
+                {name:"Топографическая анатомия",period:"11/02–06/03",location:"корпус №2",address:"ул.Московская,155Е",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Московская+155Е"},
+                {name:"Общественное здоровье",period:"11/03–27/03",location:"корпус №6",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137"},
+                {name:"Иммунология и аллергология",period:"01/04–15/04",location:"УКБ №2",address:"ул.Провиантская,22",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Провиантская+22"},
+                {name:"Клиническая биохимия",period:"01/04–15/04",location:"корпус №2",address:"ул.Московская,155Е",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Московская+155Е"},
+                {name:"Общая хирургия",period:"16/04–30/04, 05/05–07/05",location:"СГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141"},
+                {name:"Неотложные состояния",period:"15/05–20/05",location:"корпус №7",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137"},
+                {name:"Пропедевтика",period:"21/05–11/06",location:"ГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141"}
+            ],
+            thursday:[
+                {name:"Топографическая анатомия",period:"11/02–06/03",location:"корпус №2",address:"ул.Московская,155Е",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Московская+155Е"},
+                {name:"Общественное здоровье",period:"11/03–27/03",location:"корпус №6",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137"},
+                {name:"Иммунология и аллергология",period:"01/04–15/04",location:"УКБ №2",address:"ул.Провиантская,22",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Провиантская+22"},
+                {name:"Клиническая биохимия",period:"01/04–15/04",location:"корпус №2",address:"ул.Московская,155Е",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Московская+155Е"},
+                {name:"Общая хирургия",period:"16/04–30/04, 05/05–07/05",location:"СГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141"},
+                {name:"Неотложные состояния",period:"15/05–20/05",location:"корпус №7",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137"},
+                {name:"Пропедевтика",period:"21/05–11/06",location:"ГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141"}
+            ],
+            friday:[
+                {name:"Топографическая анатомия",period:"11/02–06/03",location:"корпус №2",address:"ул.Московская,155Е",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Московская+155Е"},
+                {name:"Общественное здоровье",period:"11/03–27/03",location:"корпус №6",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137"},
+                {name:"Иммунология и аллергология",period:"01/04–15/04",location:"УКБ №2",address:"ул.Провиантская,22",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Провиантская+22"},
+                {name:"Клиническая биохимия",period:"01/04–15/04",location:"корпус №2",address:"ул.Московская,155Е",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Московская+155Е"},
+                {name:"Общая хирургия",period:"16/04–30/04, 05/05–07/05",location:"СГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141"},
+                {name:"Неотложные состояния",period:"15/05–20/05",location:"корпус №7",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137"},
+                {name:"Пропедевтика",period:"21/05–11/06",location:"ГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141"}
+            ]
+        };
+        function gFD(d){return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');}
+        function gRD(d){const m=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];return d.getDate()+' '+m[d.getMonth()];}
+        function getDatesForDay(s,e,dn){const r=[];const[sd,sm]=s.split('/').map(Number);const[ed,em]=e.split('/').map(Number);let c=new Date(2026,sm-1,sd);const en=new Date(2026,em-1,ed);while(c<=en){if(c.getDay()===dn)r.push(gFD(c));c.setDate(c.getDate()+1);}return r;}
+        function parseDateRange(ds,dw=null){if(!ds||ds==='—')return[];const parts=ds.split(', ');const all=[];parts.forEach(p=>{if(p.includes('–')){const[st,en]=p.split('–');const s=st.trim(),e=en.trim();if(s==='09/02'&&e==='16/02')all.push('09/02','16/02');else if(s==='18/05'&&e==='08/06')all.push(...getDatesForDay(s,e,1));else if(s==='16/03'&&e==='04/05')all.push(...getDatesForDay(s,e,1));else if(s==='28/04'&&e==='09/06')all.push(...getDatesForDay(s,e,2));else if(s==='09/02'&&e==='11/06'){if(dw===3)all.push(...getDatesForDay(s,e,3));else if(dw===4)all.push(...getDatesForDay(s,e,4));else if(dw===5)all.push(...getDatesForDay(s,e,5));}else if(s==='11/02'&&e==='13/05')all.push(...getDatesForDay(s,e,3));else if(s==='11/02'&&e==='06/05')all.push(...getDatesForDay(s,e,3));else if(s==='19/03'&&e==='16/04')all.push(...getDatesForDay(s,e,4));else if(s==='07/05'&&e==='04/06')all.push(...getDatesForDay(s,e,4));else if(s==='15/05'&&e==='05/06')all.push(...getDatesForDay(s,e,5));else if(s==='20/05'&&e==='10/06')all.push(...getDatesForDay(s,e,3));else if(s==='13/02'&&e==='24/04')all.push(...getDatesForDay(s,e,5));else if(s==='15/05'&&e==='22/05')all.push(...getDatesForDay(s,e,5));else if(s==='25/05'&&e==='01/06')all.push(...getDatesForDay(s,e,1));else all.push(s,e);}else all.push(p.trim());});return[...new Set(all)].sort((a,b)=>{const[da,ma]=a.split('/').map(Number);const[db,mb]=b.split('/').map(Number);return(ma*100+da)-(mb*100+db);});}
+        const LD=[
+            {day:"Понедельник",time:"08:30–10:00",subject:"Иностранный язык (РКИ)",type:"15 дн",dateRanges:"09/02–16/02, 02/03, 16/03–04/05, 18/05–08/06",dayOfWeek:1,category:"rki",professor:"Каф. Русского и латинского языков",location:"корпус №6 СГМУ",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",dates:[]},
+            {day:"Понедельник",time:"10:10–11:40",subject:"Иностранный язык (РКИ)",type:"15 дн",dateRanges:"09/02–16/02, 02/03, 16/03–04/05, 18/05–08/06",dayOfWeek:1,category:"rki",professor:"Каф. Русского и латинского языков",location:"корпус №6 СГМУ",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",dates:[]},
+            {day:"Понедельник",time:"12:10–13:40",subject:"Патологическая анатомия",type:"12 дн",dateRanges:"09/02–16/02, 02/03, 16/03–04/05, 18/05",dayOfWeek:1,category:"anatomy",professor:"Каф. Патологической анатомии",location:"корпус №4 СГМУ",address:"ул.Б.Казачья,112",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Казачья+112",dates:[]},
+            {day:"Понедельник",time:"12:20–13:50",subject:"Фармакология",type:"2 дн",dateRanges:"25/05–01/06",dayOfWeek:1,category:"pharma",professor:"Каф. Фармакологии",location:"корпус №6 СГМУ",address:"ул.Кутякова,109",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Кутякова+109",dates:[]},
+            {day:"Понедельник",time:"13:50–15:20",subject:"Патологическая анатомия",type:"12 дн",dateRanges:"09/02–16/02, 02/03, 16/03–04/05, 18/05",dayOfWeek:1,category:"anatomy",professor:"Каф. Патологической анатомии",location:"корпус №4 СГМУ",address:"ул.Б.Казачья,112",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Казачья+112",dates:[]},
+            {day:"Понедельник",time:"14:00–15:30",subject:"Фармакология",type:"2 дн",dateRanges:"25/05–01/06",dayOfWeek:1,category:"pharma",professor:"Каф. Фармакологии",location:"корпус №6 СГМУ",address:"ул.Кутякова,109",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Кутякова+109",dates:[]},
+            {day:"Понедельник",time:"16:10–17:40",subject:"Патофизиология (лекция)",type:"9 дн",dateRanges:"09/02, 16/02, 02/03, 16/03, 23/03, 30/03, 06/04, 13/04, 20/04",dayOfWeek:1,category:"pathophys",professor:"Каф. Патологической физиологии",location:"корпус №4 СГМУ",address:"ул.Б.Казачья,112",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Казачья+112",dates:[]},
+            {day:"Вторник",time:"08:30–10:00",subject:"ЦИКЛ",type:"28/04–09/06",dateRanges:"28/04–09/06",dayOfWeek:2,category:"cycle",isCycle:true,cycleDay:"tuesday",dates:[]},
+            {day:"Вторник",time:"09:00–10:30",subject:"Общая хирургия (лекция)",type:"6 дн",dateRanges:"10/02, 24/02, 10/03, 24/03, 07/04, 21/04",dayOfWeek:2,category:"surgery",professor:"Каф. Общей хирургии",location:"СГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141",dates:[]},
+            {day:"Вторник",time:"09:00–10:30",subject:"Пропедевтика (лекция)",type:"5 дн",dateRanges:"17/02, 03/03, 17/03, 31/03, 14/04",dayOfWeek:2,category:"propedeutics",professor:"Каф. Пропедевтики",location:"ГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141",dates:[]},
+            {day:"Вторник",time:"10:10–11:40",subject:"ЦИКЛ",type:"28/04–09/06",dateRanges:"28/04–09/06",dayOfWeek:2,category:"cycle",isCycle:true,cycleDay:"tuesday",dates:[]},
+            {day:"Вторник",time:"11:00–12:30",subject:"Иммунология и аллергология",type:"8 дн",dateRanges:"10/02, 17/02, 24/02, 03/03, 10/03, 17/03, 24/03, 31/03",dayOfWeek:2,category:"immunology",professor:"Каф. Клинической иммунологии",location:"УКБ №2",address:"ул.Провиантская,22",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Провиантская+22",dates:[]},
+            {day:"Вторник",time:"11:10–12:40",subject:"Общественное здоровье",type:"3 дн",dateRanges:"07/04, 14/04, 21/04",dayOfWeek:2,category:"health",professor:"Каф. Общественного здоровья",location:"корпус №6 СГМУ",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",dates:[]},
+            {day:"Среда",time:"08:30–10:00",subject:"ЦИКЛ",type:"09/02–11/06",dateRanges:"09/02–11/06",dayOfWeek:3,category:"cycle",isCycle:true,cycleDay:"wednesday",dates:[]},
+            {day:"Среда",time:"10:10–11:40",subject:"ЦИКЛ",type:"09/02–11/06",dateRanges:"09/02–11/06",dayOfWeek:3,category:"cycle",isCycle:true,cycleDay:"wednesday",dates:[]},
+            {day:"Среда",time:"12:20–13:50",subject:"Патофизиология",type:"14 дн",dateRanges:"11/02–13/05",dayOfWeek:3,category:"pathophys",professor:"Каф. Патологической физиологии",location:"корпус №4 СГМУ",address:"ул.Б.Казачья,112",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Казачья+112",dates:[]},
+            {day:"Среда",time:"14:00–15:30",subject:"Патофизиология",type:"13 дн",dateRanges:"11/02–06/05",dayOfWeek:3,category:"pathophys",professor:"Каф. Патологической физиологии",location:"корпус №4 СГМУ",address:"ул.Б.Казачья,112",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Казачья+112",dates:[]},
+            {day:"Среда",time:"15:40–17:10",subject:"Клин. биохимия (лекция)",type:"3 дн",dateRanges:"11/02, 11/03, 08/04",dayOfWeek:3,category:"biochem",professor:"Каф. Биохимии",location:"корпус №2 СГМУ",address:"ул.Московская,155Е",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Московская+155Е",dates:[]},
+            {day:"Среда",time:"15:40–17:10",subject:"Топограф. анатомия (лекция)",type:"6 дн",dateRanges:"25/02, 25/03, 22/04, 06/05, 20/05, 03/06",dayOfWeek:3,category:"topographic",professor:"Каф. Оперативной хирургии",location:"корпус №2 СГМУ",address:"ул.Московская,155Е",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Московская+155Е",dates:[]},
+            {day:"Среда",time:"15:50–17:20",subject:"Фармакология (лекция)",type:"7 дн",dateRanges:"18/02, 04/03, 18/03, 01/04, 15/04, 29/04, 13/05",dayOfWeek:3,category:"pharma",professor:"Каф. Фармакологии",location:"корпус №6 СГМУ",address:"ул.Кутякова,109",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Кутякова+109",dates:[]},
+            {day:"Среда",time:"17:50–19:20",subject:"Физкультура (электив)",type:"5 дн",dateRanges:"11/02, 25/02, 11/03, 25/03, 08/04",dayOfWeek:3,category:"pe",professor:"Каф. Физвоспитания",location:"ФОК корпус №6",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",dates:[]},
+            {day:"Среда",time:"12:20–13:50",subject:"Физкультура (2-я гр.)",type:"4 дн",dateRanges:"20/05–10/06",dayOfWeek:3,category:"pe",professor:"Каф. Физвоспитания",location:"ФОК корпус №6",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",dates:[]},
+            {day:"Четверг",time:"08:30–10:00",subject:"ЦИКЛ",type:"09/02–11/06",dateRanges:"09/02–11/06",dayOfWeek:4,category:"cycle",isCycle:true,cycleDay:"thursday",dates:[]},
+            {day:"Четверг",time:"10:10–11:40",subject:"ЦИКЛ",type:"09/02–11/06",dateRanges:"09/02–11/06",dayOfWeek:4,category:"cycle",isCycle:true,cycleDay:"thursday",dates:[]},
+            {day:"Четверг",time:"11:50–13:20",subject:"Общая хирургия",type:"1 дн",dateRanges:"30/04",dayOfWeek:4,category:"surgery",professor:"Каф. Общей хирургии",location:"СГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141",dates:[]},
+            {day:"Четверг",time:"12:20–13:50",subject:"Иностранный язык (РКИ)",type:"5 дн",dateRanges:"19/03–16/04",dayOfWeek:4,category:"rki",professor:"Каф. Русского и латинского языков",location:"корпус №6 СГМУ",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",dates:[]},
+            {day:"Четверг",time:"12:20–13:50",subject:"Фармакология",type:"5 дн",dateRanges:"07/05–04/06",dayOfWeek:4,category:"pharma",professor:"Каф. Фармакологии",location:"корпус №6 СГМУ",address:"ул.Кутякова,109",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Кутякова+109",dates:[]},
+            {day:"Четверг",time:"14:00–15:30",subject:"Фармакология",type:"5 дн",dateRanges:"07/05–04/06",dayOfWeek:4,category:"pharma",professor:"Каф. Фармакологии",location:"корпус №6 СГМУ",address:"ул.Кутякова,109",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Кутякова+109",dates:[]},
+            {day:"Пятница",time:"08:30–10:00",subject:"Фармакология",type:"4 дн",dateRanges:"15/05–05/06",dayOfWeek:5,category:"pharma",professor:"Каф. Фармакологии",location:"корпус №6 СГМУ",address:"ул.Кутякова,109",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Кутякова+109",dates:[]},
+            {day:"Пятница",time:"10:10–11:40",subject:"Фармакология",type:"4 дн",dateRanges:"15/05–05/06",dayOfWeek:5,category:"pharma",professor:"Каф. Фармакологии",location:"корпус №6 СГМУ",address:"ул.Кутякова,109",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Кутякова+109",dates:[]},
+            {day:"Пятница",time:"10:40–12:10",subject:"Общественное здоровье",type:"2 дн",dateRanges:"13/03, 20/03",dayOfWeek:5,category:"health",professor:"Каф. Общественного здоровья",location:"корпус №6 СГМУ",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",dates:[]},
+            {day:"Пятница",time:"12:20–13:50",subject:"ЦИКЛ",type:"09/02–11/06",dateRanges:"09/02–11/06",dayOfWeek:5,category:"cycle",isCycle:true,cycleDay:"friday",dates:[]},
+            {day:"Пятница",time:"14:00–15:30",subject:"ЦИКЛ",type:"09/02–11/06",dateRanges:"09/02–11/06",dayOfWeek:5,category:"cycle",isCycle:true,cycleDay:"friday",dates:[]},
+            {day:"Пятница",time:"16:10–17:40",subject:"Патологическая анатомия",type:"6 дн",dateRanges:"13/02, 27/02, 13/03, 27/03, 10/04, 24/04",dayOfWeek:5,category:"anatomy",professor:"Каф. Патологической анатомии",location:"корпус №4 СГМУ",address:"ул.Б.Казачья,112",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Казачья+112",conflict:true,dates:[]},
+            {day:"Пятница",time:"16:10–17:40",subject:"Неотложные состояния",type:"2 дн",dateRanges:"20/02, 06/03",dayOfWeek:5,category:"emergency",professor:"Каф. Скорой помощи",location:"корпус №7 УКБ №1",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",conflict:true,dates:[]},
+            {day:"Пятница",time:"16:10–17:40",subject:"Общая хирургия",type:"1 дн",dateRanges:"20/03",dayOfWeek:5,category:"surgery",professor:"Каф. Общей хирургии",location:"СГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141",conflict:true,dates:[]},
+            {day:"Пятница",time:"16:10–17:40",subject:"Пропедевтика",type:"4 дн",dateRanges:"03/04, 17/04, 15/05, 22/05",dayOfWeek:5,category:"propedeutics",professor:"Каф. Пропедевтики",location:"ГКБ №2",address:"ул.Чернышевского,141",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Чернышевского+141",conflict:true,dates:[]},
+            {day:"Пятница",time:"16:10–17:40",subject:"Физкультура",type:"2 дн",dateRanges:"29/05, 05/06",dayOfWeek:5,category:"pe",professor:"Каф. Физвоспитания",location:"ФОК корпус №6",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",conflict:true,dates:[]},
+            {day:"Пятница",time:"18:10–19:40",subject:"Физкультура",type:"13 дн",dateRanges:"13/02–24/04, 15/05–22/05",dayOfWeek:5,category:"pe",professor:"Каф. Физвоспитания",location:"ФОК корпус №6",address:"ул.Б.Садовая,137",mapLink:"https://yandex.ru/maps/?text=Саратов+ул.+Большая+Садовая+137",dates:[]}
+        ];
+        LD.forEach(l=>{l.dates=parseDateRange(l.dateRanges,l.dayOfWeek);});
+        let favorites=JSON.parse(localStorage.getItem('fav31')||'[]');
+        let hiddenCats=JSON.parse(localStorage.getItem('hid31')||'[]');
+        let notes=JSON.parse(localStorage.getItem('notes31')||'{}');
+
+        // ===== DARK MODE =====
+        function toggleDark(){const h=document.documentElement;const isDark=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',isDark?'':'dark');localStorage.setItem('theme31',isDark?'light':'dark');document.getElementById('darkBtn').textContent=isDark?'🌙':'☀️';}
+        (function(){const t=localStorage.getItem('theme31');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');setTimeout(()=>{document.getElementById('darkBtn').textContent='☀️';},0);}})();
+
+        // ===== COUNTDOWN =====
+        function updateCountdown(){const diff=SEMESTER_END-CURRENT_DATE;const days=Math.max(0,Math.ceil(diff/(1000*60*60*24)));const weeks=Math.floor(days/7);const totalLessons=LD.reduce((s,l)=>s+l.dates.length,0);const passedL=LD.reduce((s,l)=>s+l.dates.filter(d=>{const[dy,mn]=d.split('/').map(Number);const c=gFD(CURRENT_DATE);const[cd,cm]=c.split('/').map(Number);return(mn<cm)||(mn===cm&&dy<cd);}).length,0);
+        document.getElementById('countdownBar').innerHTML='<div class="countdown-item"><div class="countdown-num">'+days+'</div><div class="countdown-label">дней</div></div><div class="countdown-item"><div class="countdown-num">'+weeks+'</div><div class="countdown-label">недель</div></div><div class="countdown-item"><div class="countdown-num">'+passedL+'</div><div class="countdown-label">пройдено</div></div><div class="countdown-item"><div class="countdown-num">'+(totalLessons-passedL)+'</div><div class="countdown-label">осталось</div></div><div class="countdown-item"><div class="countdown-num">'+Math.round(passedL/totalLessons*100)+'%</div><div class="countdown-label">прогресс</div></div>';}
+
+        // ===== NOTES =====
+        function getNoteKey(l){return l.day+'-'+l.time+'-'+l.subject;}
+        function getNote(l){return notes[getNoteKey(l)]||'';}
+        function saveNote(l,text){const k=getNoteKey(l);if(text.trim())notes[k]=text.trim();else delete notes[k];localStorage.setItem('notes31',JSON.stringify(notes));}
+        function hasNote(l){return!!notes[getNoteKey(l)];}
+
+        // ===== CORE =====
+        function init(){updateCountdown();renderLegend();renderSchedule();updateFavCount();document.getElementById('dateSearch').min='2026-02-09';document.getElementById('dateSearch').max='2026-06-11';}
+        function renderLegend(){const c={'pharma':'Фармакология','anatomy':'Пат.анатомия','pathophys':'Патофизиология','surgery':'Хирургия','propedeutics':'Пропедевтика','immunology':'Иммунология','rki':'РКИ','cycle':'ЦИКЛ','emergency':'Неотл.помощь','health':'Общ.здоровье','topographic':'Топогр.анатомия','biochem':'Клин.биохимия','pe':'Физкультура'};document.getElementById('legend').innerHTML='<h3>🎨 Фильтр предметов</h3><div class="legend-items">'+Object.entries(c).map(([k,v])=>'<div class="legend-item '+(hiddenCats.includes(k)?'hidden':'')+'" onclick="toggleCat(\''+k+'\')"><div class="color-box '+k+'"></div><span>'+v+'</span></div>').join('')+'</div>';}
+        function toggleCat(c){if(hiddenCats.includes(c))hiddenCats=hiddenCats.filter(x=>x!==c);else hiddenCats.push(c);localStorage.setItem('hid31',JSON.stringify(hiddenCats));renderSchedule(document.getElementById('dateSearch').value?fmtD(document.getElementById('dateSearch').value):null);renderLegend();}
+        function fmtD(v){const[y,m,d]=v.split('-');return d+'/'+m;}
+        function calcP(l){if(!l.dates||!l.dates.length)return{total:0,passed:0,remaining:0,pct:0,next:null};const cs=gFD(CURRENT_DATE);const p=l.dates.filter(d=>{const[dy,mn]=d.split('/').map(Number);const[cd,cm]=cs.split('/').map(Number);return(mn<cm)||(mn===cm&&dy<cd);}).length;const r=l.dates.length-p;const pct=Math.round(p/l.dates.length*100);const nx=l.dates.find(d=>{const[dy,mn]=d.split('/').map(Number);const[cd,cm]=cs.split('/').map(Number);return(mn>cm)||(mn===cm&&dy>=cd);});return{total:l.dates.length,passed:p,remaining:r,pct,next:nx};}
+        function getCycleD(l,sd=null){if(!l.isCycle||!l.cycleDay)return null;const cs=cycleData[l.cycleDay];if(!cs)return null;if(sd){const[sD,sM]=sd.split('/').map(Number);const so=new Date(2026,sM-1,sD);for(let c of cs){for(let p of c.period.split(', ')){if(p.includes('–')){const[st,en]=p.split('–');const[s1,s2]=st.trim().split('/').map(Number);const[e1,e2]=en.trim().split('/').map(Number);if(so>=new Date(2026,s2-1,s1)&&so<=new Date(2026,e2-1,e1))return[c];}}}}return cs;}
+
+        function renderSchedule(fd=null,ss=false){
+            const g=document.getElementById('scheduleGrid');const days=['Понедельник','Вторник','Среда','Четверг','Пятница'];g.innerHTML='';let tL=0,tP=0,tR=0;
+            days.forEach(day=>{
+                let dl=LD.filter(l=>l.day===day&&!hiddenCats.includes(l.category));
+                if(fd){dl=dl.filter(l=>l.dates.includes(fd));if(!dl.length)return;}
+                tL+=dl.length;
+                const card=document.createElement('div');card.className='day-card active';
+                let lH=dl.map(lesson=>{
+                    const iF=favorites.includes(day+'-'+lesson.time+'-'+lesson.subject);
+                    const gi=LD.indexOf(lesson);const p=calcP(lesson);tP+=p.passed;tR+=p.remaining;
+                    const pH=p.total>0?'<div class="lesson-progress"><div class="progress-text"><span>'+p.passed+'/'+p.total+'</span><span>'+p.pct+'%</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+p.pct+'%"></div></div>'+(p.next?'<div class="next-lesson">📅 '+p.next+'</div>':'<div class="next-lesson" style="color:#e53e3e;">✅ Завершено</div>')+'</div>':'';
+                    let cH='';if(lesson.isCycle&&lesson.cycleDay){const cd=getCycleD(lesson,fd);if(cd&&cd.length){if(fd){cH='<div class="cycle-details"><div class="cycle-item"><span><strong>'+cd[0].name+'</strong></span><span class="cycle-period">'+cd[0].period+'</span></div><div style="font-size:0.8em;color:var(--text-light);margin-top:4px;">📍 '+cd[0].location+'</div></div>';}else{cH='<div class="cycle-details">'+cd.map(c=>'<div class="cycle-item"><span><strong>'+c.name+'</strong></span><span class="cycle-period">'+c.period+'</span></div>').join('')+'</div>';}}}
+                    const noteInd=hasNote(lesson)?'<div class="note-indicator">📝</div>':'';
+                    return'<div class="lesson '+lesson.category+(fd?' current-day':'')+'" onclick="openModal('+gi+(fd?',\''+fd+'\'':'')+')">'+noteInd+'<span class="favorite-star '+(iF?'active':'')+'" onclick="event.stopPropagation();toggleFav(\''+day+'\',\''+lesson.time+'\',\''+lesson.subject+'\');">'+(iF?'★':'☆')+'</span><div class="lesson-header"><div class="lesson-time">'+lesson.time+'</div><div class="lesson-title">'+lesson.subject+'</div><div class="lesson-badge">'+lesson.type+'</div></div>'+(fd?'<div style="padding:0 12px 8px;font-size:0.85em;color:var(--text-light);">📅 '+fd+'/2026</div>':'')+cH+pH+'</div>';
+                }).join('');
+                if(day==='Пятница'&&!fd&&dl.some(l=>l.time==='16:10–17:40'&&l.conflict))lH='<div class="conflict-notice">⚠️ 16:10–17:40 — разные дисциплины по датам</div>'+lH;
+                card.innerHTML='<div class="day-header"><span>🗓️ '+day+'</span>'+(fd?'<span style="font-size:0.55em;background:#ffd700;color:#000;padding:4px 10px;border-radius:15px;">'+fd+'</span>':'')+'</div>'+lH;
+                g.appendChild(card);
+            });
+            if(ss&&fd){document.getElementById('statsGrid').innerHTML='<div class="stat-card"><div class="stat-number">'+tL+'</div><div class="stat-label">Занятий</div></div><div class="stat-card"><div class="stat-number" style="color:#48bb78;">'+tP+'</div><div class="stat-label">Пройдено</div></div><div class="stat-card"><div class="stat-number" style="color:#ed8936;">'+tR+'</div><div class="stat-label">Осталось</div></div>';document.getElementById('statsBar').classList.add('active');}else document.getElementById('statsBar').classList.remove('active');
+        }
+
+        function showToday(){const ts=gFD(CURRENT_DATE);const dw=CURRENT_DATE.getDay();if(dw===0||dw===6){alert('🎉 Выходной!');return;}document.getElementById('dateSearch').value='';renderSchedule(ts,true);const i=document.getElementById('resultsInfo');i.innerHTML='🌅 Сегодня: <strong>'+gRD(CURRENT_DATE)+'</strong> | <button onclick="showAll()" style="background:none;border:none;color:#22543d;text-decoration:underline;cursor:pointer;">Сбросить</button>';i.classList.add('active');}
+        function showTomorrow(){const t=new Date(CURRENT_DATE);t.setDate(t.getDate()+1);const ts=gFD(t);const dw=t.getDay();if(dw===0||dw===6){alert('🌄 Завтра выходной!');return;}document.getElementById('dateSearch').value='';renderSchedule(ts,true);const i=document.getElementById('resultsInfo');i.innerHTML='🌄 Завтра: <strong>'+gRD(t)+'</strong> | <button onclick="showAll()" style="background:none;border:none;color:#22543d;text-decoration:underline;cursor:pointer;">Сбросить</button>';i.classList.add('active');}
+        function searchByDate(){const v=document.getElementById('dateSearch').value;if(!v)return;const sd=fmtD(v);const hl=LD.some(l=>l.dates.includes(sd)&&!hiddenCats.includes(l.category));renderSchedule(sd,true);const[y,m,d]=v.split('-');document.getElementById('resultsInfo').innerHTML='📅 '+d+'.'+m+'.'+y+' | <button onclick="showAll()" style="background:none;border:none;color:#22543d;text-decoration:underline;cursor:pointer;">Сбросить</button>';document.getElementById('resultsInfo').classList.add('active');document.getElementById('noResults').classList.toggle('active',!hl);}
+        function showAll(){document.getElementById('dateSearch').value='';document.getElementById('resultsInfo').classList.remove('active');document.getElementById('noResults').classList.remove('active');document.getElementById('statsBar').classList.remove('active');renderSchedule();}
+
+        // ===== MODAL with NOTES =====
+        function openModal(li,sd=null){
+            const l=LD[li];if(!l)return;
+            document.getElementById('modalTitle').textContent=l.subject;
+            document.getElementById('modalTime').textContent=l.day+' | '+l.time;
+            const p=calcP(l);
+            const dd=l.dates.length?l.dates.map(d=>'<span class="date-tag">'+d+'</span>').join(''):'—';
+            const pD=p.total?'<div class="info-section" style="background:linear-gradient(135deg,#f0fff4,#c6f6d5);border-left-color:#48bb78;"><h3>📊 Прогресс</h3><div style="display:flex;justify-content:space-between;"><span>'+p.passed+'/'+p.total+'</span><span style="font-weight:bold;color:#2f855a;">'+p.pct+'%</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+p.pct+'%"></div></div>'+(p.next?'<p style="color:#2b6cb0;">📅 Следующее: '+p.next+'</p>':'<p style="color:#e53e3e;">✅ Все пройдены!</p>')+'</div>':'';
+            let cD='';if(l.isCycle&&l.cycleDay){const cs=cycleData[l.cycleDay];if(cs){let ac=null;if(sd){const[s1,s2]=sd.split('/').map(Number);const so=new Date(2026,s2-1,s1);for(let c of cs){for(let pp of c.period.split(', ')){if(pp.includes('–')){const[st,en]=pp.split('–');const[a1,a2]=st.trim().split('/').map(Number);const[b1,b2]=en.trim().split('/').map(Number);if(so>=new Date(2026,a2-1,a1)&&so<=new Date(2026,b2-1,b1)){ac=c;break;}}}if(ac)break;}}if(ac)cD='<div class="info-section" style="background:linear-gradient(135deg,#e6fffa,#b2f5ea);border-left-color:#38b2ac;"><h3>🏥 Ротация ('+sd+')</h3><p><strong>'+ac.name+'</strong></p><p>📍 '+ac.location+', '+ac.address+'</p><a href="'+ac.mapLink+'" target="_blank" class="map-link">🗺️ Карта</a></div>';else cD='<div class="info-section"><h3>🏥 Ротации</h3>'+cs.map(c=>'<div style="margin:8px 0;padding:8px;background:var(--bg-card);border-radius:8px;"><strong>'+c.name+'</strong><br><span style="color:var(--text-light);">📅 '+c.period+'</span><br>📍 '+c.location+'<br><a href="'+c.mapLink+'" target="_blank" class="map-link" style="font-size:0.8em;">🗺️</a></div>').join('')+'</div>';}}
+            const noteVal=getNote(l).replace(/"/g,'&quot;').replace(/</g,'&lt;');
+            const noteSection='<div class="notes-section"><h3>📝 Заметки</h3><textarea class="notes-textarea" id="noteArea" placeholder="Напишите заметку..." oninput="autoSaveNote('+li+')">'+noteVal+'</textarea><div class="notes-saved" id="noteSaved">✅ Сохранено!</div></div>';
+            document.getElementById('modalBody').innerHTML=pD+cD+'<div class="info-section"><h3>👨‍🏫 Кафедра</h3><p>'+(l.professor||'—')+'</p></div><div class="info-section"><h3>📍 Место</h3><p><strong>'+(l.location||'')+'</strong><br>'+(l.address||'')+'</p>'+(l.mapLink?'<a href="'+l.mapLink+'" target="_blank" class="map-link">🗺️ Яндекс.Карты</a>':'')+'</div><div class="info-section"><h3>📅 Даты ('+l.type+')</h3><div class="dates-list">'+dd+'</div></div>'+(l.conflict?'<div style="background:#fff5f5;color:#c53030;padding:12px;border-radius:8px;border-left:4px solid #fc8181;margin-top:10px;"><strong>⚠️</strong> Разные дисциплины в это время</div>':'')+noteSection;
+            document.getElementById('modal').classList.add('active');document.body.style.overflow='hidden';
+        }
+        let noteTimer=null;
+        function autoSaveNote(li){clearTimeout(noteTimer);noteTimer=setTimeout(()=>{const l=LD[li];const t=document.getElementById('noteArea').value;saveNote(l,t);const sv=document.getElementById('noteSaved');sv.style.display='block';setTimeout(()=>sv.style.display='none',1500);renderSchedule();},500);}
+        function closeModal(e){if(!e||e.target.id==='modal'){document.getElementById('modal').classList.remove('active');document.body.style.overflow='';}}
+        function toggleFav(d,t,s){const k=d+'-'+t+'-'+s;const i=favorites.indexOf(k);if(i>-1)favorites.splice(i,1);else favorites.push(k);localStorage.setItem('fav31',JSON.stringify(favorites));updateFavCount();renderSchedule();}
+        function updateFavCount(){document.getElementById('favCount').textContent=favorites.length;}
+        function showFavorites(){if(!favorites.length){alert('⭐ Пусто!');return;}let h='<h2 style="color:var(--primary);margin-bottom:15px;">⭐ Избранное</h2>';favorites.forEach(f=>{const[d,t,...sp]=f.split('-');const s=sp.join('-');const l=LD.find(x=>x.day===d&&x.time===t&&x.subject===s);if(l){const p=calcP(l);h+='<div style="background:var(--bg-section);padding:12px;border-radius:12px;margin-bottom:10px;border-left:4px solid #f56565;"><strong style="color:var(--primary);">'+s+'</strong><div style="color:var(--text-light);margin:4px 0;font-size:0.9em;">'+d+' | '+t+'</div><div style="font-size:0.8em;"><span style="color:#48bb78;">✅'+p.passed+'</span> / <span style="color:#ed8936;">⏳'+p.remaining+'</span></div><button onclick="toggleFav(\''+d+'\',\''+t+'\',\''+s+'\');showFavorites()" style="margin-top:8px;background:#fc8181;color:#fff;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.85em;">Удалить</button></div>';}});document.getElementById('modalBody').innerHTML=h;document.getElementById('modalTitle').textContent='Избранное';document.getElementById('modalTime').textContent=favorites.length+' шт.';document.getElementById('modal').classList.add('active');}
+
+        // ===== EXPORT ICS =====
+        function exportICS(){try{const n=new Date();const ds=n.getUTCFullYear()+String(n.getUTCMonth()+1).padStart(2,'0')+String(n.getUTCDate()).padStart(2,'0')+'T'+String(n.getUTCHours()).padStart(2,'0')+String(n.getUTCMinutes()).padStart(2,'0')+String(n.getUTCSeconds()).padStart(2,'0')+'Z';let ic='BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//СГМУ//RU\nCALSCALE:GREGORIAN\nX-WR-CALNAME:СГМУ 2026\n';LD.forEach((l,li)=>{if(!l.dates||hiddenCats.includes(l.category))return;if(l.isCycle&&l.cycleDay){const cs=cycleData[l.cycleDay];if(cs)cs.forEach((c,ci)=>{c.period.split(', ').forEach((p,pi)=>{if(p.includes('–')){const[st,en]=p.split('–');const[sd,sm]=st.trim().split('/').map(Number);const[ed,em]=en.trim().split('/').map(Number);let cu=new Date(2026,sm-1,sd);const eD=new Date(2026,em-1,ed);while(cu<=eD){if(cu.getDay()===l.dayOfWeek){const df=gFD(cu);const[d,m]=df.split('/').map(Number);const[sh,si]=l.time.split('–')[0].split(':');const[eh,ei]=l.time.split('–')[1].split(':');ic+='BEGIN:VEVENT\nDTSTART:2026'+String(m).padStart(2,'0')+String(d).padStart(2,'0')+'T'+sh+si+'00\nDTEND:2026'+String(m).padStart(2,'0')+String(d).padStart(2,'0')+'T'+eh+ei+'00\nDTSTAMP:'+ds+'\nUID:c'+li+ci+pi+d+m+'@sgmu\nSUMMARY:'+c.name+' (ЦИКЛ)\nLOCATION:'+c.location+'\nBEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:Занятие\nTRIGGER:-PT10M\nEND:VALARM\nEND:VEVENT\n';}cu.setDate(cu.getDate()+1);}}});});}else{l.dates.forEach((d,di)=>{const[dy,mn]=d.split('/');const[sh,si]=l.time.split('–')[0].split(':');const[eh,ei]=l.time.split('–')[1].split(':');ic+='BEGIN:VEVENT\nDTSTART:2026'+mn+dy+'T'+sh+si+'00\nDTEND:2026'+mn+dy+'T'+eh+ei+'00\nDTSTAMP:'+ds+'\nUID:l'+li+di+d.replace('/','')+'@sgmu\nSUMMARY:'+l.subject+'\nLOCATION:'+(l.location||'')+'\nBEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:Занятие\nTRIGGER:-PT10M\nEND:VALARM\nEND:VEVENT\n';});}});ic+='END:VCALENDAR';const b=new Blob([ic],{type:'text/calendar'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='sgmu-2026.ics';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);}catch(e){alert('❌ '+e.message);}}
+
+        // ===== PWA =====
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+        let deferredPrompt=null;
+        if('serviceWorker' in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+        window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='flex';if(!localStorage.getItem('instD31'))setTimeout(()=>document.getElementById('installBanner').classList.add('active'),3000);});
+        function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted'){document.getElementById('installBanner').classList.remove('active');document.getElementById('installBtn').style.display='none';}deferredPrompt=null;});}else alert('📲 Установка:\n🍎 iOS: Safari → Поделиться → На экран Домой\n🤖 Android: Chrome → ⋮ → Установить');}
+        function dismissInstall(){document.getElementById('installBanner').classList.remove('active');localStorage.setItem('instD31','1');}
+        window.addEventListener('appinstalled',()=>{document.getElementById('installBanner').classList.remove('active');document.getElementById('installBtn').style.display='none';});
+        window.addEventListener('online',()=>document.getElementById('offlineBadge').classList.remove('active'));
+        window.addEventListener('offline',()=>document.getElementById('offlineBadge').classList.add('active'));
+        if(!navigator.onLine)document.getElementById('offlineBadge').classList.add('active');
+        init();
+    </script>
+</body>
+</html>
